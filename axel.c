@@ -30,6 +30,7 @@ static void save_state( axel_t *axel );
 static void *setup_thread( void * );
 static void axel_message( axel_t *axel, char *format, ... );
 static void axel_divide( axel_t *axel );
+static int axel_incrementalChunkSize( axel_t *axel );
 
 static char *buffer = NULL;
 
@@ -234,31 +235,35 @@ int axel_open( axel_t *axel )
 
 void reactivate_connection(axel_t *axel, int thread)
 {
-	long long int max_remaining = 0,remaining;
-	int j, idx = -1;
+	long long int max_lastbyte = 0;
+	int j, idx = -1, incrementalSize;
+	incrementalSize = axel_incrementalChunkSize( axel );
 
 	if(axel->conn[thread].enabled || axel->conn[thread].currentbyte <= axel->conn[thread].lastbyte)
 		return;
+
 	/* find some more work to do */
 	for( j = 0; j < axel->conf->num_connections; j ++ )
 	{
-		remaining = axel->conn[j].lastbyte - axel->conn[j].currentbyte + 1;
-		if(remaining > max_remaining)
+		if(axel->conn[j].lastbyte > max_lastbyte)
 		{
-			max_remaining = remaining;
+			max_lastbyte = axel->conn[j].lastbyte;
 			idx = j;
 		}
 	}
-	/*do not reactivate for less than 100KB */
-	if(max_remaining >= 100 * 1024 && idx != -1)
-	{
+
+	if (max_lastbyte < axel->size && idx != -1) {
 #ifdef DEBUG
 		printf("\nReactivate connection %d\n",thread);
 #endif
-		axel->conn[thread].lastbyte = axel->conn[idx].lastbyte;
-		axel->conn[idx].lastbyte = axel->conn[idx].currentbyte + max_remaining/2;
+		axel->conn[thread].lastbyte = axel->conn[idx].lastbyte + incrementalSize;
 		axel->conn[thread].currentbyte = axel->conn[idx].lastbyte + 1;
+
+		if (axel->conn[thread].lastbyte > axel->size) {
+			axel->conn[thread].lastbyte = axel->size - 1;
+		}
 	}
+
 }
 
 /* Start downloading							*/
@@ -628,22 +633,35 @@ static void axel_message( axel_t *axel, char *format, ... )
 	}
 }
 
+int incremental_maxChunkSizeBytes = 5 * 1024 * 1024;
+
+static int axel_incrementalChunkSize( axel_t *axel ) {
+	int chunkSize;
+	chunkSize = axel->size / (axel->conf->num_connections + 1);
+	if (chunkSize > incremental_maxChunkSizeBytes) {
+		chunkSize = incremental_maxChunkSizeBytes;
+	}
+	return chunkSize;
+}
+
 /* Divide the file and set the locations for each connection		*/
 static void axel_divide( axel_t *axel )
 {
 	int i;
-	
+	int incrementalSize;
+
+	incrementalSize = axel_incrementalChunkSize( axel );
+
 	axel->conn[0].currentbyte = 0;
-	axel->conn[0].lastbyte = axel->size / axel->conf->num_connections - 1;
-	for( i = 1; i < axel->conf->num_connections; i ++ )
+	axel->conn[0].lastbyte = incrementalSize;
+	for( i = 1; i <= axel->conf->num_connections; i ++ )
 	{
 #ifdef DEBUG
 		printf( "Downloading %lld-%lld using conn. %i\n", axel->conn[i-1].currentbyte, axel->conn[i-1].lastbyte, i - 1 );
 #endif
 		axel->conn[i].currentbyte = axel->conn[i-1].lastbyte + 1;
-		axel->conn[i].lastbyte = axel->conn[i].currentbyte + axel->size / axel->conf->num_connections;
+		axel->conn[i].lastbyte = axel->conn[i].currentbyte + incrementalSize;
 	}
-	axel->conn[axel->conf->num_connections-1].lastbyte = axel->size - 1;
 #ifdef DEBUG
 	printf( "Downloading %lld-%lld using conn. %i\n", axel->conn[i-1].currentbyte, axel->conn[i-1].lastbyte, i - 1 );
 #endif
