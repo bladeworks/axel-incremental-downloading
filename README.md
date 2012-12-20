@@ -18,7 +18,8 @@ I downloaded on a 700 meg file from a remote host, the hash matched the original
 ./configure --prefix=/opt/local --i18n=1 
 make -j8 -w all CFLAGS="-O2 -arch x86_64 -I/opt/local/include" LFLAGS="-L/opt/local/lib -lintl -liconv"
 
-## Todo
-Rebase work on a clean axel source.
+## Author
+Nicolae Namolovan
+
 
 Feel free to fork and improve.

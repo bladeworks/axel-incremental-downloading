@@ -633,7 +633,7 @@ static void axel_message( axel_t *axel, char *format, ... )
 	}
 }
 
-int incremental_maxChunkSizeBytes = 5 * 1024 * 1024;
+int incremental_maxChunkSizeBytes = 1 * 1024 * 1024;
 
 static int axel_incrementalChunkSize( axel_t *axel ) {
 	int chunkSize;
@@ -654,7 +654,7 @@ static void axel_divide( axel_t *axel )
 
 	axel->conn[0].currentbyte = 0;
 	axel->conn[0].lastbyte = incrementalSize;
-	for( i = 1; i <= axel->conf->num_connections; i ++ )
+	for( i = 1; i < axel->conf->num_connections; i ++ )
 	{
 #ifdef DEBUG
 		printf( "Downloading %lld-%lld using conn. %i\n", axel->conn[i-1].currentbyte, axel->conn[i-1].lastbyte, i - 1 );
