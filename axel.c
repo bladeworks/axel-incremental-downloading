@@ -417,7 +417,7 @@ void axel_do( axel_t *axel )
 			/* Don't terminate, still stuff to write!	*/
 		}
 		/* This should always succeed..				*/
-		lseek( axel->outfd, axel->conn[i].currentbyte, SEEK_SET );
+		lseek( axel->outfd, axel->conn[i].currentbyte + 1 - axel->conn[0].conf->from_byte, SEEK_SET );
 		if( write( axel->outfd, buffer, size ) != size )
 		{
 			
