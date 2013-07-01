@@ -316,7 +316,10 @@ int conn_info( conn_t *conn )
 		
 		do
 		{
-			conn->currentbyte = 1;
+			conn->currentbyte = conn->conf->from_byte;
+			if (conn->conf->to_byte > 0) {
+				conn->lastbyte = conn->conf->to_byte - 1;
+			}
 			if( !conn_setup( conn ) )
 				return( 0 );
 			conn_exec( conn );

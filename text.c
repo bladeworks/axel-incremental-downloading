@@ -54,6 +54,8 @@ static struct option axel_options[] =
 	{ "alternate",		0,	NULL,	'a' },
 	{ "header",		1,	NULL,	'H' },
 	{ "user-agent",		1,	NULL,	'U' },
+	{ "from-byte",		1,	NULL,	'f' },
+	{ "to-byte",		1,	NULL,	't' },
 	{ NULL,			0,	NULL,	0 }
 };
 #endif
@@ -90,7 +92,7 @@ int main( int argc, char *argv[] )
 	{
 		int option;
 		
-		option = getopt_long( argc, argv, "s:n:o:S::NqvhVaH:U:", axel_options, NULL );
+		option = getopt_long( argc, argv, "s:n:o:S::NqvhVaH:U:f:t:", axel_options, NULL );
 		if( option == -1 )
 			break;
 		
@@ -152,6 +154,21 @@ int main( int argc, char *argv[] )
 			if( open( "/dev/null", O_WRONLY ) != 1 )
 			{
 				fprintf( stderr, _("Can't redirect stdout to /dev/null.\n") );
+				return( 1 );
+			}
+			break;
+		case 'f':
+			if( !sscanf( optarg, "%lld", &conf->from_byte ) )
+			{
+				print_help();
+				return( 1 );
+			}
+			("*** &conf->from_byte = %lld", conf->from_byte);
+			break;
+		case 't':
+			if( !sscanf( optarg, "%lld", &conf->to_byte ) )
+			{
+				print_help();
 				return( 1 );
 			}
 			break;
@@ -550,6 +567,8 @@ void print_help()
 		"-a\tAlternate progress indicator\n"
 		"-h\tThis information\n"
 		"-V\tVersion information\n"
+		"-f\tFrom byte(start with 1)\n"
+		"-t\tTo byte\n"
 		"\n"
 		"Visit http://axel.alioth.debian.org/ to report bugs\n") );
 #else
@@ -567,6 +586,8 @@ void print_help()
 		"--alternate\t\t-a\tAlternate progress indicator\n"
 		"--help\t\t\t-h\tThis information\n"
 		"--version\t\t-V\tVersion information\n"
+		"--from-byte\t\t\t-f\tFrom byte\n"
+		"--to-byte\t\t\t-t\tTo byte\n"
 		"\n"
 		"Visit http://axel.alioth.debian.org/ to report bugs\n") );
 #endif

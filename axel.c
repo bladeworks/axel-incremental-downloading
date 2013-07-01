@@ -637,7 +637,7 @@ int incremental_maxChunkSizeBytes = 1 * 1024 * 1024;
 
 static int axel_incrementalChunkSize( axel_t *axel ) {
 	int chunkSize;
-	chunkSize = axel->size / (axel->conf->num_connections + 1);
+	chunkSize = axel->size / axel->conf->num_connections + 1;
 	if (chunkSize > incremental_maxChunkSizeBytes) {
 		chunkSize = incremental_maxChunkSizeBytes;
 	}
@@ -652,8 +652,8 @@ static void axel_divide( axel_t *axel )
 
 	incrementalSize = axel_incrementalChunkSize( axel );
 
-	axel->conn[0].currentbyte = 0;
-	axel->conn[0].lastbyte = incrementalSize;
+	axel->conn[0].currentbyte = axel->conn[0].conf->from_byte - 1;
+	axel->conn[0].lastbyte = axel->conn[0].currentbyte + incrementalSize;
 	for( i = 1; i < axel->conf->num_connections; i ++ )
 	{
 #ifdef DEBUG
@@ -661,6 +661,9 @@ static void axel_divide( axel_t *axel )
 #endif
 		axel->conn[i].currentbyte = axel->conn[i-1].lastbyte + 1;
 		axel->conn[i].lastbyte = axel->conn[i].currentbyte + incrementalSize;
+		if (axel->conn[i].lastbyte > axel->conn[0].conf->to_byte) {
+			axel->conn[i].lastbyte = axel->conn[0].conf->to_byte - 1;
+		}
 	}
 #ifdef DEBUG
 	printf( "Downloading %lld-%lld using conn. %i\n", axel->conn[i-1].currentbyte, axel->conn[i-1].lastbyte, i - 1 );

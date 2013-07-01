@@ -38,6 +38,12 @@
 		st = 1;						\
 		sscanf( value, "%i", &conf->name );		\
 	}
+#define get_long_long_int( name )				\
+	if( strcmp( key, #name ) == 0 )				\
+	{							\
+		st = 1;						\
+		sscanf( value, "%lld", &conf->name );		\
+	}
 	
 int parse_interfaces( conf_t *conf, char *s );
 
@@ -94,6 +100,9 @@ int conf_loadfile( conf_t *conf, char *file )
 		get_config_number( search_threads );
 		get_config_number( search_amount );
 		get_config_number( search_top );
+
+		get_long_long_int( from_byte );
+		get_long_long_int( to_byte );
 		
 		/* Option defunct but shouldn't be an error		*/
 		if( strcmp( key, "speed_type" ) == 0 )
@@ -142,6 +151,10 @@ int conf_init( conf_t *conf )
 	conf->search_amount		= 15;
 	conf->search_top		= 3;
 	conf->add_header_count		= 0;
+
+	conf->from_byte         = 1;
+	conf->to_byte           = 0;
+
 	strncpy( conf->user_agent, DEFAULT_USER_AGENT, MAX_STRING );
 	
 	conf->interfaces = malloc( sizeof( if_t ) );
