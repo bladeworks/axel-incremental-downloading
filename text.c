@@ -163,7 +163,6 @@ int main( int argc, char *argv[] )
 				print_help();
 				return( 1 );
 			}
-			("*** &conf->from_byte = %lld", conf->from_byte);
 			break;
 		case 't':
 			if( !sscanf( optarg, "%lld", &conf->to_byte ) )
