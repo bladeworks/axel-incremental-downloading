@@ -258,7 +258,7 @@ void reactivate_connection(axel_t *axel, int thread)
 #endif
 		axel->conn[thread].currentbyte = axel->conn[idx].lastbyte + 1;
 		axel->conn[thread].lastbyte = axel->conn[idx].lastbyte + incrementalSize;
-		if (axel->conn[thread].lastbyte > axel->conn[0].conf->to_byte) {
+		if (axel->conn[0].conf->to_byte > 0 && axel->conn[thread].lastbyte > axel->conn[0].conf->to_byte) {
 			axel->conn[thread].lastbyte = axel->conn[0].conf->to_byte - 1;
 		}
 	}
@@ -660,7 +660,7 @@ static void axel_divide( axel_t *axel )
 #endif
 		axel->conn[i].currentbyte = axel->conn[i-1].lastbyte + 1;
 		axel->conn[i].lastbyte = axel->conn[i].currentbyte + incrementalSize;
-		if (axel->conn[i].lastbyte > axel->conn[0].conf->to_byte) {
+		if (axel->conn[0].conf->to_byte > 0 && axel->conn[i].lastbyte > axel->conn[0].conf->to_byte) {
 			axel->conn[i].lastbyte = axel->conn[0].conf->to_byte - 1;
 		}
 	}
