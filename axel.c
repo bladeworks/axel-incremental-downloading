@@ -252,15 +252,14 @@ void reactivate_connection(axel_t *axel, int thread)
 		}
 	}
 
-	if (max_lastbyte < axel->size && idx != -1) {
+	if (max_lastbyte < (axel->size + axel->conn[0].conf->from_byte - 1) && idx != -1) {
 #ifdef DEBUG
 		printf("\nReactivate connection %d\n",thread);
 #endif
-		axel->conn[thread].lastbyte = axel->conn[idx].lastbyte + incrementalSize;
 		axel->conn[thread].currentbyte = axel->conn[idx].lastbyte + 1;
-
-		if (axel->conn[thread].lastbyte > axel->size) {
-			axel->conn[thread].lastbyte = axel->size - 1;
+		axel->conn[thread].lastbyte = axel->conn[idx].lastbyte + incrementalSize;
+		if (axel->conn[thread].lastbyte > axel->conn[0].conf->to_byte) {
+			axel->conn[thread].lastbyte = axel->conn[0].conf->to_byte - 1;
 		}
 	}
 
@@ -638,9 +637,9 @@ int incremental_maxChunkSizeBytes = 1 * 1024 * 1024;
 static int axel_incrementalChunkSize( axel_t *axel ) {
 	int chunkSize;
 	chunkSize = axel->size / axel->conf->num_connections + 1;
-	// if (chunkSize > incremental_maxChunkSizeBytes) {
-    //		chunkSize = incremental_maxChunkSizeBytes;
-	//}
+	if (chunkSize > incremental_maxChunkSizeBytes) {
+  		chunkSize = incremental_maxChunkSizeBytes;
+	}
 	return chunkSize;
 }
 
