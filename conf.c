@@ -138,7 +138,7 @@ int conf_init( conf_t *conf )
 	*conf->no_proxy			= 0;
 	conf->strip_cgi_parameters	= 1;
 	conf->save_state_interval	= 10;
-	conf->connection_timeout	= 45;
+	conf->connection_timeout	= 5;
 	conf->reconnect_delay		= 20;
 	conf->num_connections		= 4;
 	conf->buffer_size		= 5120;
