@@ -437,6 +437,16 @@ void axel_do( axel_t *axel )
 				axel_message( axel, _("Connection %i timed out"), i );
 			conn_disconnect( &axel->conn[i] );
 			axel->conn[i].enabled = 0;
+			if( conn_setup( &axel->conn[i] ) )
+			{
+				axel->conn[i].last_transfer = gettime();
+				if( conn_exec( &axel->conn[i] ) )
+				{
+					axel->conn[i].last_transfer = gettime();
+					axel->conn[i].enabled = 1;
+					axel->conn[i].state = 0;
+				}
+			}
 		}
 	} }
 	
