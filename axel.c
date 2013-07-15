@@ -30,7 +30,7 @@ static void save_state( axel_t *axel );
 static void *setup_thread( void * );
 static void axel_message( axel_t *axel, char *format, ... );
 static void axel_divide( axel_t *axel );
-static int axel_incrementalChunkSize( axel_t *axel );
+static long long int axel_incrementalChunkSize( axel_t *axel );
 
 static char *buffer = NULL;
 
@@ -642,10 +642,13 @@ static void axel_message( axel_t *axel, char *format, ... )
 	}
 }
 
-int incremental_maxChunkSizeBytes = 1 * 1024 * 1024;
+long long int incremental_maxChunkSizeBytes = 1 * 1024 * 1024;
 
-static int axel_incrementalChunkSize( axel_t *axel ) {
-	int chunkSize;
+static long long int axel_incrementalChunkSize( axel_t *axel ) {
+	if (axel->conf->num_connections == 1) {
+		return axel->size;
+	}
+	long long int chunkSize;
 	chunkSize = axel->size / (2 * axel->conf->num_connections) + 1;
 	if (chunkSize > incremental_maxChunkSizeBytes) {
   		chunkSize = incremental_maxChunkSizeBytes;
@@ -657,7 +660,7 @@ static int axel_incrementalChunkSize( axel_t *axel ) {
 static void axel_divide( axel_t *axel )
 {
 	int i;
-	int incrementalSize;
+	long long int incrementalSize;
 
 	incrementalSize = axel_incrementalChunkSize( axel );
 
