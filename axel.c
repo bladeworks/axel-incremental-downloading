@@ -646,7 +646,7 @@ int incremental_maxChunkSizeBytes = 1 * 1024 * 1024;
 
 static int axel_incrementalChunkSize( axel_t *axel ) {
 	int chunkSize;
-	chunkSize = axel->size / axel->conf->num_connections + 1;
+	chunkSize = axel->size / (2 * axel->conf->num_connections) + 1;
 	if (chunkSize > incremental_maxChunkSizeBytes) {
   		chunkSize = incremental_maxChunkSizeBytes;
 	}
