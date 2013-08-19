@@ -666,6 +666,9 @@ static void axel_divide( axel_t *axel )
 
 	axel->conn[0].currentbyte = axel->conn[0].conf->from_byte - 1;
 	axel->conn[0].lastbyte = axel->conn[0].currentbyte + incrementalSize;
+	if (axel->conn[0].lastbyte >= axel->size) {
+		axel->conn[0].lastbyte = axel->size - 1;
+	}
 	for( i = 1; i < axel->conf->num_connections; i ++ )
 	{
 #ifdef DEBUG
